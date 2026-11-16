@@ -309,12 +309,12 @@
         font-size: 20px;
       }
 
-      /* 置中且緊湊的學測輸入列與輸入框 */
+      /* 置中且平分區域的學測輸入列與輸入框 */
       #gsatView .input-group {
         width: 90%;
         max-width: 440px;
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
         margin: 6px auto;
         padding: 8px 12px;
@@ -322,11 +322,20 @@
         border: 1px solid #e2e8f0;
         border-radius: 10px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+        gap: 12px;
+      }
+
+      #gsatView .input-group .subject-slot {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         gap: 6px;
       }
 
       #gsatView .input-group label {
-        width: 48px;
+        width: 46px;
         text-align: center;
         font-size: 19px;
         font-weight: bold;
@@ -334,13 +343,10 @@
         flex: none;
       }
 
-      /* 第二組科目標籤與第一組輸入框之間保留適度分隔 */
-      #gsatView .input-group label + input[type="number"] + label {
-        margin-left: 10px;
-      }
-
       #gsatView .input-group input[type="number"] {
-        width: 82px !important;
+        flex: 1 1 auto;
+        width: 100% !important;
+        max-width: 92px;
         height: 40px !important;
         font-size: 20px;
         font-weight: bold;
@@ -748,27 +754,36 @@
 
           <form id="gsat_gradeForm">
             <div class="input-group">
-              <label for="gsat_chinese">國文:</label>
-              <input type="number" id="gsat_chinese" min="0" max="15" placeholder="級分" value="">
-
-              <label for="gsat_english">英文:</label>
-              <input type="number" id="gsat_english" min="0" max="15" placeholder="級分" value="">
+              <div class="subject-slot">
+                <label for="gsat_chinese">國文:</label>
+                <input type="number" id="gsat_chinese" min="0" max="15" placeholder="級分" value="">
+              </div>
+              <div class="subject-slot">
+                <label for="gsat_english">英文:</label>
+                <input type="number" id="gsat_english" min="0" max="15" placeholder="級分" value="">
+              </div>
             </div>
 
             <div class="input-group">
-              <label for="gsat_mathA">數A:</label>
-              <input type="number" id="gsat_mathA" min="0" max="15" placeholder="級分" value="">
-
-              <label for="gsat_mathB">數B:</label>
-              <input type="number" id="gsat_mathB" min="0" max="15" placeholder="級分" value="">
+              <div class="subject-slot">
+                <label for="gsat_mathA">數A:</label>
+                <input type="number" id="gsat_mathA" min="0" max="15" placeholder="級分" value="">
+              </div>
+              <div class="subject-slot">
+                <label for="gsat_mathB">數B:</label>
+                <input type="number" id="gsat_mathB" min="0" max="15" placeholder="級分" value="">
+              </div>
             </div>
 
             <div class="input-group">
-              <label for="gsat_social">社會:</label>
-              <input type="number" id="gsat_social" min="0" max="15" placeholder="級分" value="">
-
-              <label for="gsat_science">自然:</label>
-              <input type="number" id="gsat_science" min="0" max="15" placeholder="級分" value="">
+              <div class="subject-slot">
+                <label for="gsat_social">社會:</label>
+                <input type="number" id="gsat_social" min="0" max="15" placeholder="級分" value="">
+              </div>
+              <div class="subject-slot">
+                <label for="gsat_science">自然:</label>
+                <input type="number" id="gsat_science" min="0" max="15" placeholder="級分" value="">
+              </div>
             </div>
             
             <button class="back-button" type="button" id="gsat_find_btn">查詢</button>
@@ -970,17 +985,14 @@
     <script>
       /* ================= 導覽列頁面切換控制 ================= */
       function switchView(viewName) {
-        // 隱藏所有主畫面
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('gsatView').classList.add('hidden');
         document.getElementById('techView').classList.add('hidden');
 
-        // 移除導覽列按鈕 active 狀態
         document.getElementById('nav-home').classList.remove('active');
         document.getElementById('nav-gsat').classList.remove('active');
         document.getElementById('nav-tech').classList.remove('active');
 
-        // 顯示對應畫面並高亮按鈕
         if (viewName === 'home') {
           document.getElementById('homeView').classList.remove('hidden');
           document.getElementById('nav-home').classList.add('active');
@@ -1122,7 +1134,6 @@
       var data_114 = [], data_113 = [], data_112 = [];
       var ans = [], choose = "";
 
-
       function showScoreConfirmModal(scores) {
         return new Promise((resolve) => {
           document.getElementById('confirm_chinese').textContent = scores["國文"] + " 級分";
@@ -1169,7 +1180,6 @@
         const isConfirmed = await showScoreConfirmModal(score_114_1);
         if (!isConfirmed) return;
 
-        // 2科成績總和
         score_114_2["國文、英文"] = score_114_1["國文"] + score_114_1["英文"];
         score_114_2["國文、數學A"] = score_114_1["國文"] + score_114_1["數學A"];
         score_114_2["國文、數學B"] = score_114_1["國文"] + score_114_1["數學B"];
@@ -1185,7 +1195,6 @@
         score_114_2["數學B、自然"] = score_114_1["數學B"] + score_114_1["自然"];
         score_114_2["社會、自然"] = score_114_1["社會"] + score_114_1["自然"];
 
-        // 3科成績總和
         score_114_3["國文、英文、數學A"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學A"];
         score_114_3["國文、英文、數學B"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學B"];
         score_114_3["國文、英文、社會"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["社會"];
@@ -1203,7 +1212,6 @@
         score_114_3["數學A、社會、自然"] = score_114_1["數學A"] + score_114_1["社會"] + score_114_1["自然"];
         score_114_3["數學B、社會、自然"] = score_114_1["數學B"] + score_114_1["社會"] + score_114_1["自然"];
 
-        // 4科成績總和
         score_114_4["國文、英文、數學A、社會"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學A"] + score_114_1["社會"];
         score_114_4["國文、英文、數學A、自然"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學A"] + score_114_1["自然"];
         score_114_4["國文、英文、數學B、社會"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學B"] + score_114_1["社會"];
