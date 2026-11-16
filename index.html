@@ -225,6 +225,10 @@
         align-items: center;
       }
 
+      #noticeModal {
+        z-index: 1100;
+      }
+
       .modal-content2 {
         background-color: #fff;
         margin: auto;
@@ -461,8 +465,9 @@
         }
       }
 
-      /* ================= 自訂成績確認遮罩彈窗樣式 ================= */
+      /* ================= 自訂成績確認與通知遮罩彈窗樣式 ================= */
       .confirm-modal-box {
+        position: relative;
         background-color: #ffffff;
         margin: auto;
         padding: 28px 24px;
@@ -472,6 +477,26 @@
         text-align: center;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
         animation: modalFadeIn 0.2s ease-out;
+      }
+
+      .notice-close-btn {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        background: transparent;
+        border: none;
+        font-size: 26px;
+        line-height: 1;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: background-color 0.2s, color 0.2s;
+      }
+
+      .notice-close-btn:hover {
+        background-color: #f3f4f6;
+        color: #111827;
       }
 
       @keyframes modalFadeIn {
@@ -518,6 +543,14 @@
         font-weight: bold;
       }
 
+      .notice-message-text {
+        font-size: 18px;
+        color: #1f2937;
+        line-height: 1.6;
+        margin: 8px 0 4px 0;
+        font-weight: 500;
+      }
+
       .confirm-btn-group {
         display: flex;
         gap: 12px;
@@ -559,6 +592,15 @@
     <div id="progress-bar"></div>
     <div id="loadingModal" class="modal">
       <div class="modal-content2" id="loadingModalContent"></div>
+    </div>
+
+    <!-- 自訂通知遮罩彈窗 -->
+    <div id="noticeModal" class="modal">
+      <div class="confirm-modal-box">
+        <button type="button" id="noticeCloseBtn" class="notice-close-btn" aria-label="關閉">×</button>
+        <h3 id="noticeModalTitle" class="confirm-modal-title">提示通知</h3>
+        <p id="noticeModalMessage" class="notice-message-text"></p>
+      </div>
     </div>
 
     <!-- 成績確認遮罩彈窗 -->
@@ -876,6 +918,35 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
+      /* ================= 自訂通知遮罩彈窗控制器 ================= */
+      function showNoticeModal(message, title = "提示通知") {
+        return new Promise((resolve) => {
+          const modal = document.getElementById('noticeModal');
+          const titleEl = document.getElementById('noticeModalTitle');
+          const msgEl = document.getElementById('noticeModalMessage');
+          const closeBtn = document.getElementById('noticeCloseBtn');
+
+          titleEl.textContent = title;
+          msgEl.innerHTML = String(message).replace(/\n/g, '<br>');
+          modal.style.display = 'flex';
+
+          function cleanup() {
+            modal.style.display = 'none';
+            closeBtn.removeEventListener('click', onClose);
+            modal.removeEventListener('click', onBackdrop);
+            resolve();
+          }
+
+          function onClose() { cleanup(); }
+          function onBackdrop(e) {
+            if (e.target === modal) cleanup();
+          }
+
+          closeBtn.addEventListener('click', onClose);
+          modal.addEventListener('click', onBackdrop);
+        });
+      }
+
       /* ================= 圓形進度條控制器 ================= */
       const progressBar = document.getElementById('progress-bar');
       const loadingModal = document.getElementById('loadingModal');
@@ -1107,24 +1178,24 @@
         document.getElementById('gsat_resultScreen').classList.remove('hidden');
       });
 
-      document.getElementById("checkboxButton").addEventListener("click", function(event) {
+      document.getElementById("checkboxButton").addEventListener("click", async function(event) {
         event.preventDefault();
         let cells = document.querySelectorAll("#mytable tbody td");
         cells.forEach(cell => cell.style.color = "black");
         resetGsatTableText();
-        submitCheckbox(score_114_1, score_114_2, score_114_3, score_114_4, data_114, data_113, data_112);
+        await submitCheckbox(score_114_1, score_114_2, score_114_3, score_114_4, data_114, data_113, data_112);
       });
 
-      function submitCheckbox(score_114_1, score_114_2, score_114_3, score_114_4, data_114, data_113, data_112) {
+      async function submitCheckbox(score_114_1, score_114_2, score_114_3, score_114_4, data_114, data_113, data_112) {
         ans = [];
         let checkedOptions = document.querySelectorAll('#checkboxForm input[name="option"]:checked');
         
         if(document.getElementById('option3').checked && document.getElementById('option4').checked) {
-          return alert("數學A 與 數學B 無法同時選擇");
+          return showNoticeModal("數學A 與 數學B 無法同時選擇");
         } else if(checkedOptions.length == 0) {
-          return alert("請選擇科目\n最少 1 科 至多 4 科");
+          return showNoticeModal("請選擇科目\n最少 1 科 至多 4 科");
         } else if(checkedOptions.length > 4) {
-          return alert("請選擇科目選擇至多 4 科");
+          return showNoticeModal("請選擇科目選擇至多 4 科");
         } else {
           checkedOptions.forEach(option => ans.push(option.value));
         }
