@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高雄市立新莊高中學測成績轉換系統</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Microsoft JhengHei", Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+        color: #1f2937;
+      }
+
+      /* ================= 導覽列樣式 ================= */
+      .navbar {
+        background-color: #1e3a8a;
+        color: white;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        position: sticky;
+        top: 0;
+        z-index: 900;
+      }
+
+      .nav-brand {
+        font-size: 22px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 12px;
+      }
+
+      .nav-btn {
+        background: transparent;
+        border: 2px solid transparent;
+        color: #e2e8f0;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .nav-btn:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+      }
+
+      .nav-btn.active {
+        background-color: #3b82f6;
+        color: #ffffff;
+        border-color: #60a5fa;
+      }
+
+      /* ================= 開始畫面 (首頁) 樣式 ================= */
+      #homeView {
+        max-width: 900px;
+        margin: 50px auto;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .hero-box {
+        background: white;
+        padding: 40px 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+      }
+
+      .hero-title {
+        font-size: 44px;
+        color: #1e3a8a;
+        margin: 0 0 12px 0;
+      }
+
+      .hero-subtitle {
+        font-size: 20px;
+        color: #4b5563;
+        margin: 0;
+      }
+
+      .card-grid {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      .feature-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 30px 24px;
+        width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      .feature-card h2 {
+        font-size: 28px;
+        color: #1d4ed8;
+        margin-top: 0;
+        margin-bottom: 12px;
+      }
+
+      .feature-card p {
+        font-size: 18px;
+        color: #4b5563;
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      .start-btn {
+        background-color: #4A4AFF;
+        color: white;
+        border: none;
+        padding: 14px 24px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: background-color 0.2s;
+      }
+
+      .start-btn:hover {
+        background-color: #3737d6;
+      }
+
+      /* ================= 共用隱藏與進度條樣式 ================= */
+      .hidden {
+        display: none !important;
+      }
+
+      #progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 4px;
+        background-color: #3b82f6;
+        width: 0%;
+        transition: width 0.15s ease-out, opacity 0.3s ease-in;
+        z-index: 10000;
+        opacity: 0;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content2 {
+        background-color: #fff;
+        margin: auto;
+        padding: 40px;
+        border-radius: 8px;
+        width: 300px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .progress-ring-wrapper {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 12px auto;
+      }
+      .progress-ring-svg {
+        transform: rotate(-90deg);
+      }
+      .progress-ring-circle {
+        transition: stroke-dashoffset 0.15s ease-out;
+        stroke-linecap: round;
+      }
+      .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 18px;
+        font-weight: bold;
+        color: #1f2937;
+      }
+
+      /* ================= 學測模組樣式 (#gsatView) ================= */
+      #gsatView .container {
+        width: 650px;
+        max-width: 95%;
+        margin: 20px auto;
+        text-align: center;
+      }
+
+      #gsatView h1 {
+        font-size: 44px;
+        color: blue;
+        margin-bottom: 10px;
+      }
+
+      #gsatView h4 {
+        font-size: 42px;
+        color: black;
+        margin-bottom: 15px;
+      }
+
+      #gsatView table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: white;
+      }
+
+      #gsatView th, #gsatView td {
+        border: 1px solid #333;
+        padding: 8px;
+        text-align: center;
+        font-size: 20px;
+      }
+
+      #gsatView .input-group {
+        width: 75%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 14px auto;
+        gap: 15px;
+      }
+
+      #gsatView .input-group label {
+        width: 70px;
+        text-align: left;
+        font-size: 24px;
+        flex: none;
+      }
+
+      #gsatView .input-group input[type="number"] {
+        width: 100px !important;
+        height: 44px !important;
+        font-size: 24px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+
+      #gsatView .back-button {
+        width: 65.5%;
+        padding: 12px;
+        font-size: 20px;
+        font-weight: bold;
+        background-color: #4A4AFF;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 25px;
+      }
+
+      #gsatView .year114 { background-color: #e0f7fa; }
+      #gsatView .year113 { background-color: #fff3e0; }
+      #gsatView .year112 { background-color: #e8f5e9; }
+
+      #gsatView #checkboxForm {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 12px 0;
+      }
+
+      #gsatView #checkboxForm label {
+        font-size: 20px;
+        cursor: pointer;
+      }
+
+      #gsatView #checkboxButton {
+        font-size: 18px;
+        padding: 6px 16px;
+        cursor: pointer;
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 4px;
+      }
+
+      /* ================= 科大模組樣式 (#techView) ================= */
+      #techView .container {
+        width: 900px;
+        max-width: 95%;
+        margin: 20px auto;
+        text-align: center;
+      }
+
+      #techView h1 {
+        font-size: 44px;
+        color: blue;
+        margin-bottom: 10px;
+      }
+
+      #techView h4 {
+        font-size: 42px;
+        color: black;
+        margin-bottom: 15px;
+      }
+
+      #techView .table-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      #techView table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: white;
+      }
+
+      #techView th, #techView td {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 22px;
+        border: 1px solid #ccc;
+        padding: 4px !important;
+      }
+
+      #techView th {
+        background-color: #f4f4f4;
+      }
+
+      #techView textarea {
+        width: 100%;
+        height: 56px;
+        padding-top: 14px;
+        font-size: 18px;
+        font-family: inherit;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-align: center;
+        resize: none;
+        display: block;
+      }
+
+      #techView input[type="number"] {
+        width: 100%;
+        height: 56px;
+        padding: 8px;
+        padding-left: 16px;
+        font-size: 22px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      #techView input[type="submit"], #techView .back-button {
+        width: 50%;
+        padding: 12px;
+        font-size: 20px;
+        font-weight: bold;
+        background-color: #4A4AFF;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 25px;
+      }
+
+      #techView .action-btn {
+        padding: 8px 16px;
+        font-size: 18px;
+        margin: 6px;
+        cursor: pointer;
+      }
+
+      @media print {
+        @page { margin: 1cm !important; }
+        .no-print, .navbar { display: none !important; }
+        #tech_showSchool, #tech_showoriginal {
+          transform: scale(0.9);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 頂部載入進度條與遮罩 -->
+    <div id="progress-bar"></div>
+    <div id="loadingModal" class="modal">
+      <div class="modal-content2" id="loadingModalContent"></div>
+    </div>
+
+    <!-- ✅ 頂部導覽列 -->
+    <nav class="navbar no-print">
+      <div class="nav-brand" onclick="switchView('home')">
+        🎓 高雄市立新莊高中｜學測成績轉換系統
+      </div>
+      <div class="nav-links">
+        <button id="nav-home" class="nav-btn active" onclick="switchView('home')">首頁</button>
+        <button id="nav-gsat" class="nav-btn" onclick="switchView('gsat')">學測累積人數對比</button>
+        <button id="nav-tech" class="nav-btn" onclick="switchView('tech')">科大分數轉換</button>
+      </div>
+    </nav>
+
+    <!-- ================= 1. 開始畫面 (首頁) ================= -->
+    <div id="homeView">
+      <div class="hero-box">
+        <h1 class="hero-title">高雄市立新莊高中<br>學測成績轉換系統</h1>
+        <p class="hero-subtitle">請選擇下方功能進行歷年學測級分累積人數查詢，或申請科技大學加權分數換算</p>
+      </div>
+
+      <div class="card-grid">
+        <div class="feature-card">
+          <div>
+            <h2>📊 近年學測成績對比表</h2>
+            <p>輸入各科原始級分，自由勾選 1 至 4 科採計組合，即時對照 113～115 學年度之對應級分、累積人數與累積百分比。</p>
+          </div>
+          <button class="start-btn" onclick="switchView('gsat')">進入學測成績對比</button>
+        </div>
+
+        <div class="feature-card">
+          <div>
+            <h2>🏫 科大分數轉換系統</h2>
+            <p>輸入學測原始級分與目標科技大學校系之各科採計權重，自動依據換算公式計算百分制加權總分並支援列印。</p>
+          </div>
+          <button class="start-btn" onclick="switchView('tech')">進入科大分數轉換</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 2. 近年學測成績對比畫面 ================= -->
+    <div id="gsatView" class="hidden">
+      <div class="container">
+        <!-- 成績輸入畫面 -->
+        <div id="gsat_inputScreen">
+          <h1>高雄市立新莊高中<br>近年學測成績對比表</h1>
+          <h2>組合累績人數查詢</h2>
+
+          <form id="gsat_gradeForm">
+            <div class="input-group">
+              <label for="gsat_chinese">國文:</label>
+              <input type="number" id="gsat_chinese" min="0" max="15" value="">
+
+              <label for="gsat_english">英文:</label>
+              <input type="number" id="gsat_english" min="0" max="15" value="">
+            </div>
+
+            <div class="input-group">
+              <label for="gsat_mathA">數A:</label>
+              <input type="number" id="gsat_mathA" min="0" max="15" value="">
+
+              <label for="gsat_mathB">數B:</label>
+              <input type="number" id="gsat_mathB" min="0" max="15" value="">
+            </div>
+
+            <div class="input-group">
+              <label for="gsat_social">社會:</label>
+              <input type="number" id="gsat_social" min="0" max="15" value="">
+
+              <label for="gsat_science">自然:</label>
+              <input type="number" id="gsat_science" min="0" max="15" value="">
+            </div>
+            
+            <button class="back-button" type="button" id="gsat_find_btn">查詢</button>
+            <br><br>
+          </form>
+        </div>
+
+        <!-- 橫向成績表格 -->
+        <div id="gsat_resultScreen" class="hidden">
+          <h4>查詢結果</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>國文</th>
+                <th>英文</th>
+                <th>數學A</th>
+                <th>數學B</th>
+                <th>社會</th>
+                <th>自然</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="gsat_chineseScore1"></td>
+                <td id="gsat_englishScore1"></td>
+                <td id="gsat_mathAScore1"></td>
+                <td id="gsat_mathBScore1"></td>
+                <td id="gsat_socialScore1"></td>
+                <td id="gsat_scienceScore1"></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <br><label style="font-size: 20px; font-weight: bold;">勾選想要的組合 (1~4科)</label><br>
+
+          <form id="checkboxForm">
+            <label><input type="checkbox" name="option" id="option1" value="國文"> 國文</label>
+            <label><input type="checkbox" name="option" id="option2" value="英文"> 英文</label>
+            <label><input type="checkbox" name="option" id="option3" value="數學A"> 數A</label>
+            <label><input type="checkbox" name="option" id="option4" value="數學B"> 數B</label>
+            <label><input type="checkbox" name="option" id="option5" value="社會"> 社會</label>
+            <label><input type="checkbox" name="option" id="option6" value="自然"> 自然</label>
+            
+            <button type="button" id="checkboxButton">提交</button>
+          </form>
+
+          <table id="mytable2">
+            <tbody>
+              <tr>
+                <td id="team" style="width: 30%; font-weight: bold;">組合</td>
+                <td id="Choose"></td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 16px; color: #dc2626; margin: 10px 0 4px 0;">※ 紅字為對應級分</p>
+          <table id="mytable">
+            <thead>
+              <tr>
+                <th>年度</th>
+                <th>級分</th>
+                <th>累計人數</th>
+                <th>累計百分比</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="year114"><td id="year114_1"></td><td id="score114_1"></td><td id="people114_1"></td><td id="pr114_1"></td></tr>
+              <tr class="year114"><td id="year114_2"></td><td id="score114_2"></td><td id="people114_2"></td><td id="pr114_2"></td></tr>
+              <tr class="year114"><td id="year114_3"></td><td id="score114_3"></td><td id="people114_3"></td><td id="pr114_3"></td></tr>
+
+              <tr class="year113"><td id="year113_1"></td><td id="score113_1"></td><td id="people113_1"></td><td id="pr113_1"></td></tr>
+              <tr class="year113"><td id="year113_2"></td><td id="score113_2"></td><td id="people113_2"></td><td id="pr113_2"></td></tr>
+              <tr class="year113"><td id="year113_3"></td><td id="score113_3"></td><td id="people113_3"></td><td id="pr113_3"></td></tr>
+
+              <tr class="year112"><td id="year112_1"></td><td id="score112_1"></td><td id="people112_1"></td><td id="pr112_1"></td></tr>
+              <tr class="year112"><td id="year112_2"></td><td id="score112_2"></td><td id="people112_2"></td><td id="pr112_2"></td></tr>
+              <tr class="year112"><td id="year112_3"></td><td id="score112_3"></td><td id="people112_3"></td><td id="pr112_3"></td></tr>
+            </tbody>
+          </table>
+
+          <button class="back-button" onclick="gsatGoBack()">重新輸入成績</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 3. 科大分數轉換畫面 ================= -->
+    <div id="techView" class="hidden">
+      <div class="container">
+        <!-- 成績輸入畫面 -->
+        <div id="tech_inputScreen">
+          <h1>高雄市立新莊高中<br>學測成績轉換系統</h1>
+          <h2>科大分數轉換</h2>
+
+          <form id="tech_gradeForm">
+            <div class="table-container">
+              <table id="tech_input_score">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>國文</th>
+                    <th>英文</th>
+                    <th>數學A</th>
+                    <th>數學B</th>
+                    <th>社會</th>
+                    <th>自然</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>原始級分</td>
+                    <td><input type="number" id="tech_chinese" min="0" max="15" value=""></td>
+                    <td><input type="number" id="tech_english" min="0" max="15" value=""></td>
+                    <td><input type="number" id="tech_mathA"   min="0" max="15" value=""></td>
+                    <td><input type="number" id="tech_mathB"   min="0" max="15" value=""></td>
+                    <td><input type="number" id="tech_social"  min="0" max="15" value=""></td>
+                    <td><input type="number" id="tech_science" min="0" max="15" value=""></td>
+                  </tr>
+
+                  <tr>
+                    <td><textarea id="school_1" placeholder="校系_1"></textarea></td>
+                    <td><input type="number" id="chineseWeight_1" min="0" max="8" step="any" value=""></td>
+                    <td><input type="number" id="englishWeight_1" min="0" max="8" step="any" value=""></td>
+                    <td><input type="number" id="mathAWeight_1"   min="0" max="8" step="any" value=""></td>
+                    <td><input type="number" id="mathBWeight_1"   min="0" max="8" step="any" value=""></td>
+                    <td><input type="number" id="scienceWeight_1" min="0" max="8" step="any" value=""></td>
+                    <td><input type="number" id="socialWeight_1"  min="0" max="8" step="any" value=""></td>
+                  </tr>
+                   
+                  <tr>
+                    <td colspan="7"> 
+                      <input type="button" class="action-btn" value="新增校系" onclick="techAddFunction()"> 
+                      <input type="button" class="action-btn" value="刪除校系" onclick="techDeleteFunction()"> 
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <input type="submit" value="查詢">
+            <br><br>
+          </form>
+        </div>
+
+        <!-- 橫向成績表格 -->
+        <div id="tech_resultScreen" class="hidden">
+          <h4>科大轉換結果</h4>
+          <table id="tech_showoriginal"> 
+            <thead>
+              <tr>
+                <th></th>
+                <th>國文</th>
+                <th>英文</th>
+                <th>數學A</th>
+                <th>數學B</th>
+                <th>自然</th>
+                <th>社會</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>原始級分</td>
+                <td id="chineseScore_0"></td>
+                <td id="englishScore_0"></td>
+                <td id="mathAScore_0"></td>
+                <td id="mathBScore_0"></td>
+                <td id="scienceScore_0"></td>
+                <td id="socialScore_0"></td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <label style="font-size: 22px; font-weight: bold;">換算公式：[加權分數 / (權重總和 × 15)] × 100</label>
+          <br><br>
+
+          <table id="tech_showSchool">
+            <thead>
+              <tr>
+                <th>校系\加權</th>
+                <th>國文</th>
+                <th>英文</th>
+                <th>數學A</th>
+                <th>數學B</th>
+                <th>自然</th>
+                <th>社會</th>
+                <th>加權分數</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <br>
+          <div class="no-print">
+            <button style="font-size: 20px; padding: 8px 20px; cursor: pointer;" onclick="window.print()">列印表格</button>
+          </div>
+
+          <button class="back-button no-print" onclick="techGoBack()">重新查詢</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ================= 導覽列頁面切換控制 ================= */
+      function switchView(viewName) {
+        // 隱藏所有主畫面
+        document.getElementById('homeView').classList.add('hidden');
+        document.getElementById('gsatView').classList.add('hidden');
+        document.getElementById('techView').classList.add('hidden');
+
+        // 移除導覽列按鈕 active 狀態
+        document.getElementById('nav-home').classList.remove('active');
+        document.getElementById('nav-gsat').classList.remove('active');
+        document.getElementById('nav-tech').classList.remove('active');
+
+        // 顯示對應畫面並高亮按鈕
+        if (viewName === 'home') {
+          document.getElementById('homeView').classList.remove('hidden');
+          document.getElementById('nav-home').classList.add('active');
+        } else if (viewName === 'gsat') {
+          document.getElementById('gsatView').classList.remove('hidden');
+          document.getElementById('nav-gsat').classList.add('active');
+        } else if (viewName === 'tech') {
+          document.getElementById('techView').classList.remove('hidden');
+          document.getElementById('nav-tech').classList.add('active');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      /* ================= 圓形進度條控制器 ================= */
+      const progressBar = document.getElementById('progress-bar');
+      const loadingModal = document.getElementById('loadingModal');
+      const loadingModalContent = document.getElementById('loadingModalContent');
+      let progressTimer = null;
+      const RADIUS = 35;
+      const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+      function setCircleProgress(percent) {
+        const circle = document.getElementById('progress-circle');
+        const text = document.getElementById('progress-text');
+        if (!circle || !text) return;
+        const clamped = Math.min(100, Math.max(0, Math.round(percent)));
+        const offset = CIRCUMFERENCE - (clamped / 100) * CIRCUMFERENCE;
+        circle.style.strokeDashoffset = offset;
+        text.textContent = clamped + '%';
+      }
+
+      async function runWithProgressModal(asyncTask, loadingText = "載入中，請稍候...") {
+        loadingModalContent.innerHTML = `
+          <div class="progress-ring-wrapper">
+            <svg class="progress-ring-svg" width="90" height="90">
+              <circle stroke="#e5e7eb" stroke-width="6" fill="transparent" r="${RADIUS}" cx="45" cy="45"/>
+              <circle id="progress-circle" class="progress-ring-circle"
+                stroke="#3b82f6" stroke-width="6" fill="transparent" r="${RADIUS}" cx="45" cy="45"
+                style="stroke-dasharray: ${CIRCUMFERENCE} ${CIRCUMFERENCE}; stroke-dashoffset: ${CIRCUMFERENCE};" />
+            </svg>
+            <div id="progress-text" class="progress-text">0%</div>
+          </div>
+          <p style="margin: 0; color: #4b5563; font-size: 16px;">${loadingText}</p>
+        `;
+        loadingModal.style.display = 'flex';
+
+        progressBar.style.opacity = '1';
+        progressBar.style.width = '0%';
+        let currentPercent = 0;
+        if (progressTimer) clearInterval(progressTimer);
+
+        progressTimer = setInterval(() => {
+          if (currentPercent < 99) {
+            const step = (99 - currentPercent) * 0.1 + Math.random() * 3;
+            currentPercent = Math.min(99, currentPercent + step);
+            progressBar.style.width = currentPercent + '%';
+            setCircleProgress(currentPercent);
+          }
+        }, 120);
+
+        try {
+          await asyncTask();
+        } catch (error) {
+          console.error("執行發生錯誤：", error);
+        } finally {
+          clearInterval(progressTimer);
+          progressBar.style.width = '100%';
+          setCircleProgress(100);
+
+          await new Promise(resolve => setTimeout(resolve, 400));
+
+          loadingModal.style.display = 'none';
+          progressBar.style.opacity = '0';
+          setTimeout(() => {
+            progressBar.style.width = '0%';
+          }, 300);
+        }
+      }
+
+      /* ================= 學測成績對比邏輯 ================= */
+      var ids114 = ["year114_1", "score114_1", "people114_1", "pr114_1", "year114_2", "score114_2", "people114_2", "pr114_2", "year114_3", "score114_3", "people114_3", "pr114_3"];
+      var ids113 = ["year113_1", "score113_1", "people113_1", "pr113_1", "year113_2", "score113_2", "people113_2", "pr113_2", "year113_3", "score113_3", "people113_3", "pr113_3"];
+      var ids112 = ["year112_1", "score112_1", "people112_1", "pr112_1", "year112_2", "score112_2", "people112_2", "pr112_2", "year112_3", "score112_3", "people112_3", "pr112_3"];
+
+      var reids114 = ids114.map(id => "#" + id);
+      var reids113 = ids113.map(id => "#" + id);
+      var reids112 = ids112.map(id => "#" + id);
+
+      function resetGsatTableText() {
+        for(let i = 0; i < 12; i += 4) {
+          document.getElementById(ids114[i]).textContent = "115";
+          document.getElementById(ids114[i+1]).textContent = "";
+          document.getElementById(ids114[i+2]).textContent = "";
+          document.getElementById(ids114[i+3]).textContent = "";
+
+          document.getElementById(ids113[i]).textContent = "114";
+          document.getElementById(ids113[i+1]).textContent = "";
+          document.getElementById(ids113[i+2]).textContent = "";
+          document.getElementById(ids113[i+3]).textContent = "";
+          
+          document.getElementById(ids112[i]).textContent = "113";
+          document.getElementById(ids112[i+1]).textContent = "";
+          document.getElementById(ids112[i+2]).textContent = "";
+          document.getElementById(ids112[i+3]).textContent = "";
+        }
+      }
+      resetGsatTableText();
+
+      var score_114_1 = {}, score_114_2 = {}, score_114_3 = {}, score_114_4 = {};
+      var data_114 = [], data_113 = [], data_112 = [];
+      var ans = [], choose = "";
+
+      document.getElementById("gsat_find_btn").addEventListener("click", async function() {
+        score_114_1["國文"] = Number(document.getElementById('gsat_chinese').value || 0);
+        score_114_1["英文"] = Number(document.getElementById('gsat_english').value || 0);
+        score_114_1["數學A"] = Number(document.getElementById('gsat_mathA').value || 0);
+        score_114_1["數學B"] = Number(document.getElementById('gsat_mathB').value || 0);
+        score_114_1["自然"] = Number(document.getElementById('gsat_science').value || 0);
+        score_114_1["社會"] = Number(document.getElementById('gsat_social').value || 0);
+        
+        var message =
+          "請確認輸入的成績：\n" +
+          "國文: " + score_114_1["國文"] + "\n" +
+          "英文: " + score_114_1["英文"] + "\n" +
+          "數學A: " + score_114_1["數學A"] + "\n" +
+          "數學B: " + score_114_1["數學B"] + "\n" +
+          "自然: " + score_114_1["自然"] + "\n" +
+          "社會: " + score_114_1["社會"] + "\n\n" +
+          "確認後將無法修改，確定要提交嗎？\n" +
+          "按下確認後請等待網頁計算";
+
+        if (!confirm(message)) return;
+
+        // 2科成績總和
+        score_114_2["國文、英文"] = score_114_1["國文"] + score_114_1["英文"];
+        score_114_2["國文、數學A"] = score_114_1["國文"] + score_114_1["數學A"];
+        score_114_2["國文、數學B"] = score_114_1["國文"] + score_114_1["數學B"];
+        score_114_2["國文、社會"] = score_114_1["國文"] + score_114_1["社會"];
+        score_114_2["國文、自然"] = score_114_1["國文"] + score_114_1["自然"];
+        score_114_2["英文、數學A"] = score_114_1["英文"] + score_114_1["數學A"];
+        score_114_2["英文、數學B"] = score_114_1["英文"] + score_114_1["數學B"];
+        score_114_2["英文、社會"] = score_114_1["英文"] + score_114_1["社會"];
+        score_114_2["英文、自然"] = score_114_1["英文"] + score_114_1["自然"];
+        score_114_2["數學A、社會"] = score_114_1["數學A"] + score_114_1["社會"];
+        score_114_2["數學A、自然"] = score_114_1["數學A"] + score_114_1["自然"];
+        score_114_2["數學B、社會"] = score_114_1["數學B"] + score_114_1["社會"];
+        score_114_2["數學B、自然"] = score_114_1["數學B"] + score_114_1["自然"];
+        score_114_2["社會、自然"] = score_114_1["社會"] + score_114_1["自然"];
+
+        // 3科成績總和
+        score_114_3["國文、英文、數學A"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學A"];
+        score_114_3["國文、英文、數學B"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學B"];
+        score_114_3["國文、英文、社會"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["社會"];
+        score_114_3["國文、英文、自然"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["自然"];
+        score_114_3["國文、數學A、社會"] = score_114_1["國文"] + score_114_1["數學A"] + score_114_1["社會"];
+        score_114_3["國文、數學A、自然"] = score_114_1["國文"] + score_114_1["數學A"] + score_114_1["自然"];
+        score_114_3["國文、數學B、社會"] = score_114_1["國文"] + score_114_1["數學B"] + score_114_1["社會"];
+        score_114_3["國文、數學B、自然"] = score_114_1["國文"] + score_114_1["數學B"] + score_114_1["自然"];
+        score_114_3["國文、社會、自然"] = score_114_1["國文"] + score_114_1["社會"] + score_114_1["自然"];
+        score_114_3["英文、數學A、社會"] = score_114_1["英文"] + score_114_1["數學A"] + score_114_1["社會"];
+        score_114_3["英文、數學A、自然"] = score_114_1["英文"] + score_114_1["數學A"] + score_114_1["自然"];
+        score_114_3["英文、數學B、社會"] = score_114_1["英文"] + score_114_1["數學B"] + score_114_1["社會"];
+        score_114_3["英文、數學B、自然"] = score_114_1["英文"] + score_114_1["數學B"] + score_114_1["自然"];
+        score_114_3["英文、社會、自然"] = score_114_1["英文"] + score_114_1["社會"] + score_114_1["自然"];
+        score_114_3["數學A、社會、自然"] = score_114_1["數學A"] + score_114_1["社會"] + score_114_1["自然"];
+        score_114_3["數學B、社會、自然"] = score_114_1["數學B"] + score_114_1["社會"] + score_114_1["自然"];
+
+        // 4科成績總和
+        score_114_4["國文、英文、數學A、社會"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學A"] + score_114_1["社會"];
+        score_114_4["國文、英文、數學A、自然"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學A"] + score_114_1["自然"];
+        score_114_4["國文、英文、數學B、社會"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學B"] + score_114_1["社會"];
+        score_114_4["國文、英文、數學B、自然"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["數學B"] + score_114_1["自然"];
+        score_114_4["國文、英文、社會、自然"] = score_114_1["國文"] + score_114_1["英文"] + score_114_1["社會"] + score_114_1["自然"];
+        score_114_4["國文、數學A、社會、自然"] = score_114_1["國文"] + score_114_1["數學A"] + score_114_1["社會"] + score_114_1["自然"];
+        score_114_4["國文、數學B、社會、自然"] = score_114_1["國文"] + score_114_1["數學B"] + score_114_1["社會"] + score_114_1["自然"];
+        score_114_4["英文、數學A、社會、自然"] = score_114_1["英文"] + score_114_1["數學A"] + score_114_1["社會"] + score_114_1["自然"];
+        score_114_4["英文、數學B、社會、自然"] = score_114_1["英文"] + score_114_1["數學B"] + score_114_1["社會"] + score_114_1["自然"];
+
+        await runWithProgressModal(async () => {
+          try {
+            var [data_114_1, data_114_2, data_114_3, data_114_4, 
+                 data_113_1, data_113_2, data_113_3, data_113_4, 
+                 data_112_1, data_112_2, data_112_3, data_112_4] = await Promise.all([
+                  fetch("https://script.google.com/macros/s/AKfycbyanNqC_u4Z5Jc4qOuI5NrUMuJSGnOtM059KikVMyBAzvBoMJgDeYLQnfpwCpCHNuJoMQ/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycby0Wai85yls3MIxmh0ziA-ZNm1twQYRAGYegZAuRPCW5k_tdERIKv67wbmad_UFBGuVkg/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycby6NV7Q4jpVWvzkw4iSyaF9mhpTKJDyQP_-hnELVMtpcfpeSMDGP2RoFKnomVugrQ6Dyw/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycbwz5Y6KNMxbTNt8pyUjiTxcnOKPA8KqaaMVJnI1VtrL8Btm1uPwYtVahBI-bYjb1f1gcA/exec").then(res => res.json()),
+
+                  fetch("https://script.google.com/macros/s/AKfycbzo-I11-NELfZkbvjG_-4hF44UZIWKABjAFpVCxPbobUO6BsJ_cJUYZjTNUKzb2C9_Q/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycbzjh-BviHXxyOW_JpVQy1YhAeLjWGq5N-IpNKLxptrNdFKu9wZ68bpbdtyXfhpla6z4/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycby5ff7Y1fr11JiUr5C9pvsCDCjvSylnjbxyaPlSDwKY-vm8aXCG4fLelOvbBpC9eqHh/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycbx6MM1rjflHqWBxp9IS5HSKUhEM7BwABna5XWTLK7I9yMix2UtH8tPAefbCxl7adrbS/exec").then(res => res.json()),
+
+                  fetch("https://script.google.com/macros/s/AKfycbzVNgg7k_I8GYNGpypKgLTh2RklpJEdY3u8wXEyL2kUWBq_2gJN4Mr0plSw6lCqN-Jl/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycbzz3TlyAYnGgLEJITAVZRG1MBRtv62HlWJC2l8V2mG_eW37rf2LG5SIesap16y0JK7D/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycbzDUWz1w3J2DIPyqcOiK0xV2O6N-XXTJTLHikju1G0SmpeuvB91HIaFmQQrAV7GtB5/exec").then(res => res.json()),
+                  fetch("https://script.google.com/macros/s/AKfycbz3CTTCkgzYLi_PawEg-nycXKFS9LB4rf7BEsq80chDX5EjmF6CjUIhp2ZVMu-ze8Sj/exec").then(res => res.json())
+                ]);
+
+            data_114 = [data_114_1, data_114_2, data_114_3, data_114_4];
+            data_113 = [data_113_1, data_113_2, data_113_3, data_113_4];
+            data_112 = [data_112_1, data_112_2, data_112_3, data_112_4];
+          } catch (error) {
+            console.error("載入資料失敗:", error);
+          }
+        }, "資料庫加載中...");
+
+        document.getElementById('gsat_chineseScore1').textContent = score_114_1["國文"];
+        document.getElementById('gsat_englishScore1').textContent = score_114_1["英文"];
+        document.getElementById('gsat_mathAScore1').textContent = score_114_1["數學A"];
+        document.getElementById('gsat_mathBScore1').textContent = score_114_1["數學B"];
+        document.getElementById('gsat_scienceScore1').textContent = score_114_1["自然"];
+        document.getElementById('gsat_socialScore1').textContent = score_114_1["社會"];
+
+        document.getElementById('gsat_inputScreen').classList.add('hidden');
+        document.getElementById('gsat_resultScreen').classList.remove('hidden');
+      });
+
+      document.getElementById("checkboxButton").addEventListener("click", function(event) {
+        event.preventDefault();
+        let cells = document.querySelectorAll("#mytable tbody td");
+        cells.forEach(cell => cell.style.color = "black");
+        resetGsatTableText();
+        submitCheckbox(score_114_1, score_114_2, score_114_3, score_114_4, data_114, data_113, data_112);
+      });
+
+      function submitCheckbox(score_114_1, score_114_2, score_114_3, score_114_4, data_114, data_113, data_112) {
+        ans = [];
+        let checkedOptions = document.querySelectorAll('#checkboxForm input[name="option"]:checked');
+        
+        if(document.getElementById('option3').checked && document.getElementById('option4').checked) {
+          return alert("數學A 與 數學B 無法同時選擇");
+        } else if(checkedOptions.length == 0) {
+          return alert("請選擇科目\n最少 1 科 至多 4 科");
+        } else if(checkedOptions.length > 4) {
+          return alert("請選擇科目選擇至多 4 科");
+        } else {
+          checkedOptions.forEach(option => ans.push(option.value));
+        }
+
+        choose = ans.join("、");
+        document.querySelector("#Choose").textContent = choose;
+        renew(checkedOptions.length, choose, score_114_1, score_114_2, score_114_3, score_114_4, data_114, data_113, data_112);
+      }
+
+      function renew(num, choose, score114_1, score114_2, score114_3, score114_4, data_114, data_113, data_112) {
+        var table114 = [{score:"",people:"",pr:""}, {score:"",people:"",pr:""}, {score:"",people:"",pr:""}];
+        var table113 = [{score:"",people:"",pr:""}, {score:"",people:"",pr:""}, {score:"",people:"",pr:""}];
+        var table112 = [{score:"",people:"",pr:""}, {score:"",people:"",pr:""}, {score:"",people:"",pr:""}];
+        
+        let maxScore = num * 15;
+        let currentScoreMap = [score_114_1, score_114_2, score_114_3, score_114_4][num - 1];
+        let mainscore_114 = currentScoreMap[choose];
+        let mainscore_113 = maxScore;
+        let mainscore_112 = maxScore;
+
+        for (let i = 0; i <= maxScore; i++) {
+          if (Number(data_113[num-1][choose][i]["people"]) >= Number(data_114[num-1][choose][maxScore - mainscore_114]["people"]) && mainscore_114 != 0) {
+            mainscore_113 = i;
+            break;
+          }
+        }
+        for (let i = 0; i <= maxScore; i++) {
+          if (Number(data_112[num-1][choose][i]["people"]) >= Number(data_114[num-1][choose][maxScore - mainscore_114]["people"]) && mainscore_114 != 0) {
+            mainscore_112 = i;
+            break;
+          }
+        }
+
+        pushscore(maxScore - mainscore_114, maxScore, table114, data_114[num-1]);
+        pushscore(mainscore_113, maxScore, table113, data_113[num-1]);
+        pushscore(mainscore_112, maxScore, table112, data_112[num-1]);
+        changecolor(maxScore - mainscore_114, maxScore, reids114);
+        changecolor(mainscore_113, maxScore, reids113);
+        changecolor(mainscore_112, maxScore, reids112);
+
+        var j = 0;
+        for(let i = 0; i < 12; i += 4) {
+          document.querySelector(reids114[i]).textContent = "115";
+          document.querySelector(reids114[i+1]).textContent = table114[j].score;
+          document.querySelector(reids114[i+2]).textContent = table114[j].people;
+          document.querySelector(reids114[i+3]).textContent = table114[j].pr;
+
+          document.querySelector(reids113[i]).textContent = "114";
+          document.querySelector(reids113[i+1]).textContent = table113[j].score;
+          document.querySelector(reids113[i+2]).textContent = table113[j].people;
+          document.querySelector(reids113[i+3]).textContent = table113[j].pr;
+
+          document.querySelector(reids112[i]).textContent = "113";          
+          document.querySelector(reids112[i+1]).textContent = table112[j].score;
+          document.querySelector(reids112[i+2]).textContent = table112[j].people;
+          document.querySelector(reids112[i+3]).textContent = table112[j++].pr;
+        }
+      }
+
+      function pushscore(index, maxscore, changetable, data) {
+        let ans = maxscore - index;
+        if(ans == maxscore) {
+          for(let k=0; k<3; k++) {
+            changetable[k].score = ans - k;
+            changetable[k].people = data[choose][index + k]["people"];
+            changetable[k].pr = data[choose][index + k]["pr"];
+          }
+        } else if(ans == 0) {
+          for(let k=0; k<3; k++) {
+            changetable[k].score = ans + (2 - k);
+            changetable[k].people = data[choose][index - (2 - k)]["people"];
+            changetable[k].pr = data[choose][index - (2 - k)]["pr"];
+          }
+        } else {
+          for(let k=0; k<3; k++) {
+            changetable[k].score = ans + (1 - k);
+            changetable[k].people = data[choose][index - (1 - k)]["people"];
+            changetable[k].pr = data[choose][index - (1 - k)]["pr"];
+          }
+        }
+      }
+
+      function changecolor(index, maxscore, reids) {
+        let ans = maxscore - index;
+        let startIdx = (ans == maxscore) ? 0 : (ans == 0 ? 8 : 4);
+        for(let k = 0; k < 4; k++) {
+          document.querySelector(reids[startIdx + k]).style.color = "red";
+        }
+      }
+
+      function gsatGoBack() {
+        document.getElementById('gsat_resultScreen').classList.add('hidden');
+        document.getElementById('gsat_inputScreen').classList.remove('hidden');
+        document.getElementById('gsat_gradeForm').reset();
+        document.querySelectorAll('#checkboxForm input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
+        document.querySelectorAll("#mytable tbody td").forEach(cell => cell.style.color = "black");
+        resetGsatTableText();
+        document.querySelector('#Choose').textContent = "";
+      }
+
+      /* ================= 科大分數轉換邏輯 ================= */
+      document.getElementById('tech_gradeForm').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+
+        var score_0 = [
+          Number(document.getElementById('tech_chinese').value || 0),
+          Number(document.getElementById('tech_english').value || 0),
+          Number(document.getElementById('tech_mathA').value   || 0),
+          Number(document.getElementById('tech_mathB').value   || 0),
+          Number(document.getElementById('tech_science').value || 0),
+          Number(document.getElementById('tech_social').value  || 0)
+        ];
+                       
+        document.getElementById('chineseScore_0').textContent = score_0[0];
+        document.getElementById('englishScore_0').textContent = score_0[1];
+        document.getElementById('mathAScore_0').textContent = score_0[2];
+        document.getElementById('mathBScore_0').textContent = score_0[3];
+        document.getElementById('scienceScore_0').textContent = score_0[4];
+        document.getElementById('socialScore_0').textContent = score_0[5];
+
+        let table = document.getElementById('tech_input_score');
+        let num = table.rows.length - 3;
+
+        for(let i = 1; i <= num; i++) {
+          let point = [
+            Number(document.getElementById(`chineseWeight_${i}`).value || 0),
+            Number(document.getElementById(`englishWeight_${i}`).value || 0),
+            Number(document.getElementById(`mathAWeight_${i}`).value   || 0),
+            Number(document.getElementById(`mathBWeight_${i}`).value   || 0),
+            Number(document.getElementById(`scienceWeight_${i}`).value || 0),
+            Number(document.getElementById(`socialWeight_${i}`).value  || 0),
+            document.getElementById(`school_${i}`).value || `校系_${i}`
+          ];
+
+          let totalscore = 0;
+          let totalpoint = 0;
+          for(let j = 0; j < 6; j++) {
+            totalscore += score_0[j] * point[j];
+            totalpoint += 15 * point[j];
+          }
+          let endscore = (totalpoint > 0 ? (totalscore / totalpoint * 100) : 0).toFixed(2);
+
+          let showTable = document.getElementById("tech_showSchool");
+          let newRow = showTable.insertRow();
+          newRow.innerHTML = `
+            <td style="font-size: 18px;">${point[6]}</td>
+            <td>${point[0]}</td>
+            <td>${point[1]}</td>
+            <td>${point[2]}</td>
+            <td>${point[3]}</td>
+            <td>${point[4]}</td>
+            <td>${point[5]}</td>
+            <td style="font-weight: bold; color: #1d4ed8;">${endscore}</td>
+          `;
+        }
+
+        document.getElementById('tech_inputScreen').classList.add('hidden');
+        document.getElementById('tech_resultScreen').classList.remove('hidden');
+      });
+
+      function techAddFunction() {
+        let table = document.getElementById('tech_input_score');
+        let add_num = table.rows.length - 2;
+        let newRow = table.insertRow(add_num + 1);
+        
+        newRow.innerHTML = `
+          <td><textarea id="school_${add_num}" placeholder="校系_${add_num}"></textarea></td>
+          <td><input type="number" id="chineseWeight_${add_num}" min="0" max="8" step="any"></td>
+          <td><input type="number" id="englishWeight_${add_num}" min="0" max="8" step="any"></td>
+          <td><input type="number" id="mathAWeight_${add_num}" min="0" max="8" step="any"></td>
+          <td><input type="number" id="mathBWeight_${add_num}" min="0" max="8" step="any"></td>
+          <td><input type="number" id="scienceWeight_${add_num}" min="0" max="8" step="any"></td>
+          <td><input type="number" id="socialWeight_${add_num}" min="0" max="8" step="any"></td>
+        `;
+      }
+
+      function techDeleteFunction() {
+        let table = document.getElementById('tech_input_score');
+        let delete_num = table.rows.length - 2;
+        if (delete_num > 2) {
+          table.deleteRow(delete_num);
+        }
+      }
+
+      function techGoBack() {
+        let table = document.getElementById('tech_showSchool');
+        let table_row = table.rows.length;
+        for (let i = 0; i < table_row - 1; i++) {
+          table.deleteRow(-1);
+        }
+        document.getElementById('tech_resultScreen').classList.add('hidden');
+        document.getElementById('tech_inputScreen').classList.remove('hidden');
+      }
+    </script>
+  </body>
+</html>
