@@ -26,6 +26,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 12px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         position: sticky;
         top: 0;
@@ -38,11 +39,14 @@
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 8px;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+        line-height: 1.3;
       }
 
       .nav-links {
         display: flex;
+        flex-wrap: wrap;
         gap: 12px;
       }
 
@@ -56,6 +60,7 @@
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.2s ease;
+        line-height: 1.3;
       }
 
       .nav-btn:hover {
@@ -67,6 +72,43 @@
         background-color: #3b82f6;
         color: #ffffff;
         border-color: #60a5fa;
+      }
+
+      /* 📱 手機版導覽列文字折疊與響應式設定 */
+      @media (max-width: 768px) {
+        .navbar {
+          flex-direction: column;
+          padding: 10px 12px;
+          gap: 8px;
+          text-align: center;
+        }
+
+        .nav-brand {
+          justify-content: center;
+          font-size: 16px;
+          line-height: 1.35;
+        }
+
+        .nav-brand .brand-sub {
+          display: block;
+          width: 100%;
+          font-size: 14px;
+          font-weight: normal;
+          color: #dbeafe;
+        }
+
+        .nav-links {
+          width: 100%;
+          justify-content: center;
+          gap: 6px;
+        }
+
+        .nav-btn {
+          font-size: 13px;
+          padding: 6px 10px;
+          white-space: normal;
+          word-break: keep-all;
+        }
       }
 
       /* ================= 開始畫面 (首頁) 樣式 ================= */
@@ -430,7 +472,7 @@
     <!-- ✅ 頂部導覽列 -->
     <nav class="navbar no-print">
       <div class="nav-brand" onclick="switchView('home')">
-        高雄市立新莊高中｜學測成績轉換系統
+        高雄市立新莊高中<span class="brand-sub">｜學測成績轉換系統</span>
       </div>
       <div class="nav-links">
         <button id="nav-home" class="nav-btn active" onclick="switchView('home')">首頁</button>
@@ -761,7 +803,7 @@
 
         progressTimer = setInterval(() => {
           if (currentPercent < 99) {
-            const step = (99 - currentPercent) * 0.1 + Math.random() * 2;
+            const step = (99 - currentPercent) * 0.1 + Math.random() * 3;
             currentPercent = Math.min(99, currentPercent + step);
             progressBar.style.width = currentPercent + '%';
             setCircleProgress(currentPercent);
