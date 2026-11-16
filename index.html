@@ -460,6 +460,98 @@
           transform: scale(0.9);
         }
       }
+
+      /* ================= 自訂成績確認遮罩彈窗樣式 ================= */
+      .confirm-modal-box {
+        background-color: #ffffff;
+        margin: auto;
+        padding: 28px 24px;
+        border-radius: 14px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        animation: modalFadeIn 0.2s ease-out;
+      }
+
+      @keyframes modalFadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      .confirm-modal-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #1e3a8a;
+        margin: 0 0 14px 0;
+      }
+
+      .confirm-score-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 16px;
+        font-size: 18px;
+      }
+
+      .confirm-score-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 10px;
+        border-bottom: 1px dashed #cbd5e1;
+      }
+
+      .confirm-score-item span:last-child {
+        font-weight: bold;
+        color: #2563eb;
+      }
+
+      .confirm-warning-text {
+        font-size: 15px;
+        color: #dc2626;
+        line-height: 1.5;
+        margin: 0 0 20px 0;
+        font-weight: bold;
+      }
+
+      .confirm-btn-group {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+      }
+
+      .confirm-btn-cancel, .confirm-btn-ok {
+        flex: 1;
+        padding: 10px 16px;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .confirm-btn-cancel {
+        background-color: #e5e7eb;
+        color: #374151;
+      }
+
+      .confirm-btn-cancel:hover {
+        background-color: #d1d5db;
+      }
+
+      .confirm-btn-ok {
+        background-color: #4A4AFF;
+        color: #ffffff;
+      }
+
+      .confirm-btn-ok:hover {
+        background-color: #3737d6;
+      }
     </style>
   </head>
   <body>
@@ -468,6 +560,27 @@
     <div id="loadingModal" class="modal">
       <div class="modal-content2" id="loadingModalContent"></div>
     </div>
+
+    <!-- 成績確認遮罩彈窗 -->
+    <div id="confirmModal" class="modal">
+      <div class="confirm-modal-box">
+        <h3 class="confirm-modal-title">請確認輸入的成績</h3>
+        <div class="confirm-score-grid">
+          <div class="confirm-score-item"><span>國文</span><span id="confirm_chinese">0</span></div>
+          <div class="confirm-score-item"><span>英文</span><span id="confirm_english">0</span></div>
+          <div class="confirm-score-item"><span>數學A</span><span id="confirm_mathA">0</span></div>
+          <div class="confirm-score-item"><span>數學B</span><span id="confirm_mathB">0</span></div>
+          <div class="confirm-score-item"><span>自然</span><span id="confirm_science">0</span></div>
+          <div class="confirm-score-item"><span>社會</span><span id="confirm_social">0</span></div>
+        </div>
+        <p class="confirm-warning-text">確認後將無法修改，確定要提交嗎？<br>按下確認後請等待網頁計算</p>
+        <div class="confirm-btn-group">
+          <button type="button" id="confirmCancelBtn" class="confirm-btn-cancel">取消修改</button>
+          <button type="button" id="confirmOkBtn" class="confirm-btn-ok">確定提交</button>
+        </div>
+      </div>
+    </div>
+
 
     <!-- ✅ 頂部導覽列 -->
     <nav class="navbar no-print">
@@ -862,6 +975,42 @@
       var data_114 = [], data_113 = [], data_112 = [];
       var ans = [], choose = "";
 
+
+      function showScoreConfirmModal(scores) {
+        return new Promise((resolve) => {
+          document.getElementById('confirm_chinese').textContent = scores["國文"] + " 級分";
+          document.getElementById('confirm_english').textContent = scores["英文"] + " 級分";
+          document.getElementById('confirm_mathA').textContent = scores["數學A"] + " 級分";
+          document.getElementById('confirm_mathB').textContent = scores["數學B"] + " 級分";
+          document.getElementById('confirm_science').textContent = scores["自然"] + " 級分";
+          document.getElementById('confirm_social').textContent = scores["社會"] + " 級分";
+
+          const modal = document.getElementById('confirmModal');
+          const okBtn = document.getElementById('confirmOkBtn');
+          const cancelBtn = document.getElementById('confirmCancelBtn');
+
+          modal.style.display = 'flex';
+
+          function cleanup(result) {
+            modal.style.display = 'none';
+            okBtn.removeEventListener('click', onOk);
+            cancelBtn.removeEventListener('click', onCancel);
+            modal.removeEventListener('click', onBackdrop);
+            resolve(result);
+          }
+
+          function onOk() { cleanup(true); }
+          function onCancel() { cleanup(false); }
+          function onBackdrop(e) {
+            if (e.target === modal) cleanup(false);
+          }
+
+          okBtn.addEventListener('click', onOk);
+          cancelBtn.addEventListener('click', onCancel);
+          modal.addEventListener('click', onBackdrop);
+        });
+      }
+
       document.getElementById("gsat_find_btn").addEventListener("click", async function() {
         score_114_1["國文"] = Number(document.getElementById('gsat_chinese').value || 0);
         score_114_1["英文"] = Number(document.getElementById('gsat_english').value || 0);
@@ -870,18 +1019,8 @@
         score_114_1["自然"] = Number(document.getElementById('gsat_science').value || 0);
         score_114_1["社會"] = Number(document.getElementById('gsat_social').value || 0);
         
-        var message =
-          "請確認輸入的成績：\n" +
-          "國文: " + score_114_1["國文"] + "\n" +
-          "英文: " + score_114_1["英文"] + "\n" +
-          "數學A: " + score_114_1["數學A"] + "\n" +
-          "數學B: " + score_114_1["數學B"] + "\n" +
-          "自然: " + score_114_1["自然"] + "\n" +
-          "社會: " + score_114_1["社會"] + "\n\n" +
-          "確認後將無法修改，確定要提交嗎？\n" +
-          "按下確認後請等待網頁計算";
-
-        if (!confirm(message)) return;
+        const isConfirmed = await showScoreConfirmModal(score_114_1);
+        if (!isConfirmed) return;
 
         // 2科成績總和
         score_114_2["國文、英文"] = score_114_1["國文"] + score_114_1["英文"];
