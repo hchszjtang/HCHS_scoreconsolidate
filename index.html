@@ -803,7 +803,7 @@
 
         progressTimer = setInterval(() => {
           if (currentPercent < 99) {
-            const step = (99 - currentPercent) * 0.1 + Math.random() *  ;
+            const step = (99 - currentPercent) * 0.1 + Math.random() * 1 ;
             currentPercent = Math.min(99, currentPercent + step);
             progressBar.style.width = currentPercent + '%';
             setCircleProgress(currentPercent);
