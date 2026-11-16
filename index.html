@@ -448,18 +448,18 @@
       <div class="card-grid">
         <div class="feature-card">
           <div>
-            <h2>📊 近年學測成績對比表</h2>
-            <p>輸入各科原始級分，自由勾選 1 至 4 科採計組合，即時對照 113～115 學年度之對應級分、累積人數與累積百分比。</p>
+            <h2>📊 近年學測成績對照表</h2>
+            <p>輸入各科原始級分，對照近兩年之對應級分、累積人數與累積百分比。</p>
           </div>
-          <button class="start-btn" onclick="switchView('gsat')">進入學測成績對比</button>
+          <button class="start-btn" onclick="switchView('gsat')">學測成績對照</button>
         </div>
 
         <div class="feature-card">
           <div>
             <h2>🏫 科大分數轉換系統</h2>
-            <p>輸入學測原始級分與目標科技大學校系之各科採計權重，自動依據換算公式計算百分制加權總分並支援列印。</p>
+            <p>輸入學測原始級分與目標科技大學校系之各科採計權重，依據換算公式計算百分制加權總分。</p>
           </div>
-          <button class="start-btn" onclick="switchView('tech')">進入科大分數轉換</button>
+          <button class="start-btn" onclick="switchView('tech')">科大分數轉換</button>
         </div>
       </div>
     </div>
@@ -469,7 +469,7 @@
       <div class="container">
         <!-- 成績輸入畫面 -->
         <div id="gsat_inputScreen">
-          <h1>高雄市立新莊高中<br>近年學測成績對比表</h1>
+          <h1>高雄市立新莊高中<br>近年學測成績對照表</h1>
           <h2>組合累績人數查詢</h2>
 
           <form id="gsat_gradeForm">
@@ -528,7 +528,7 @@
             </tbody>
           </table>
 
-          <br><label style="font-size: 20px; font-weight: bold;">勾選想要的組合 (1~4科)</label><br>
+          <br><label style="font-size: 20px; font-weight: bold;">勾選查詢組合 (1~4科)</label><br>
 
           <form id="checkboxForm">
             <label><input type="checkbox" name="option" id="option1" value="國文"> 國文</label>
